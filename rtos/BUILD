@@ -54,7 +54,7 @@ cc_library(
 cc_library(
     name = "api_library",
     srcs =  [":api_srcs",],
-    hdrs =  [":api_hdrs",":utils_hdrs",":clk_hdrs",],
+    hdrs =  [":api_hdrs",":utils_hdrs",":driver_hdrs",],
     copts = [
         "-mcpu=cortex-a53",
         "-mthumb",
@@ -63,7 +63,7 @@ cc_library(
     deps = [
             ":api_hdrs",
             ":utils_hdrs",
-            ":clk_hdrs",
+            ":driver_hdrs",
             ],
 )
 
