@@ -1,5 +1,5 @@
-#include "arm/stack.s"
-#include "arm/bss.s"
+#include "arm/stack.S"
+#include "arm/bss.S"
 
     .section ".start", "x"
     .align

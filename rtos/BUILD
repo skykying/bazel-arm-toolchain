@@ -28,9 +28,15 @@ cc_library(
 )
 
 cc_library(
-    name = "clk_hdrs",
-    hdrs = glob(["include/drivers/clocksource/gt.h",]),
+    name = "driver_hdrs",
+    hdrs = glob(["include/drivers/*/*.h",]),
     strip_include_prefix = "include/drivers",
+)
+
+cc_library(
+    name = "libs_hdrs",
+    hdrs = glob(["include/lib/*/*.h",]),
+    strip_include_prefix = "include/lib",
 )
 
 cc_library(
@@ -49,11 +55,11 @@ cc_library(
             ],
 )
 
-
 cc_library(
     name = "arch_arm_library",
-    srcs = glob(["arch/arm/*.s",]),
-    hdrs = glob(["include/arch/arm/*.s",]),
+    srcs = glob(["arch/arm/*.S",]),
+    hdrs = glob(["include/arch/arm/*.S","include/arch/arm/*.h",":driver_hdrs"]),
     linkstatic = 1,
     strip_include_prefix = "include/arch",
+    deps = [":driver_hdrs"],
 )
