@@ -36,6 +36,13 @@ def arm_none_eabi_deps():
         url = "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-win32.zip?revision=20c5df9c-9870-47e2-b994-2a652fb99075&la=en&hash=347C07EEEB848CC8944F943D8E1EAAB55A6CA0BC",
     )
 
+    http_archive(
+        name = "rules_foreign_cc",
+        strip_prefix = "rules_foreign_cc-0.0.1",
+        urls = ["https://github.com/skykying/rules_foreign_cc/archive/v0.0.1.tar.gz"],
+        sha256 = "1837d5e7866db049879fae72893fbcda40da653fbe520d430b4828201f33edf6",
+    )
+
     native.register_toolchains(
         "@arm_none_eabi//toolchain:macos_x86_64",
         "@arm_none_eabi//toolchain:linux_x86_64",
