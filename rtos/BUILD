@@ -7,6 +7,7 @@ filegroup(
     srcs = [
         ":api_library",
         ":arch_arm_library",
+        ":arch_xen_library",
     ],
 )
 
