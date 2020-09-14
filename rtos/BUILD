@@ -42,8 +42,10 @@ cc_library(
 cc_library(
     name = "arch_hdrs",
     hdrs = glob([
-        "include/arch/*/*.S",
-        "include/arch/*/*.h",
+        "include/arch/arm/*.S",
+        "include/arch/xen/*.h",
+        "include/arch/xen/hvm/*.h",
+        "include/arch/xen/xsm/*.h",
         ]),
     strip_include_prefix = "include/arch",
 )
@@ -69,23 +71,31 @@ cc_library(
     srcs = glob(["arch/arm/*.S",]),
     hdrs = glob([":arch_hdrs",":driver_hdrs"]),
     linkstatic = 1,
-    strip_include_prefix = "include/arch",
     copts = [
         "-mcpu=cortex-a53",
         "-mthumb",
     ],
-    deps = [":driver_hdrs"],
+    deps = [
+        ":driver_hdrs",
+        ":arch_hdrs",
+    ],
 )
 
 cc_library(
     name = "arch_xen_library",
     srcs = glob(["arch/xen/*.S","arch/xen/*.c",]),
-    hdrs = glob([":arch_hdrs"]),
+    hdrs = glob([
+        ":arch_hdrs",
+        ":libs_hdrs",
+    ]),
     linkstatic = 1,
-    strip_include_prefix = "include/arch",
     copts = [
         "-mcpu=cortex-a53",
         "-mthumb",
     ],
-    deps = [":driver_hdrs"],
+    deps = [
+        ":driver_hdrs",
+        ":libs_hdrs",
+        ":arch_hdrs",
+    ],
 )

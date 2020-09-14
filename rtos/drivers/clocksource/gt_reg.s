@@ -1,6 +1,6 @@
 /**
  * @ brief:
- *
+ * 
  * Module contains set of assembly functions for manipulating generic timer.
  * For more information consult ARMv7-A TRM. 
  *

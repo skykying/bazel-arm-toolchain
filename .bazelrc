@@ -4,6 +4,9 @@
 build --incompatible_enable_cc_toolchain_resolution
 build --platforms=@arm_none_eabi//platforms:arm_none_generic
 
+# verbose messages from the sandbox
+build --sandbox_debug
+
 # Use the legacy crosstool-top config
 build:legacy --crosstool_top=@arm_none_eabi//toolchain
 build:legacy --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
