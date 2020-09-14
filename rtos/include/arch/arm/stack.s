@@ -1,4 +1,4 @@
-#include "arm_modes.s"
+#include "arm_modes.S"
 
 .macro setup_stacks
     @ Set up stack pointers

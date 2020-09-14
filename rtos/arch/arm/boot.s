@@ -93,7 +93,7 @@ stage2:
     mov r1, #0
     mcr p15, #0, r1, c7, c5, #4           @ flush prefetch buffer
     mov r0,#0x40000000
-    fmxr FPEXC, r0                        @ Set Neon/VFP Enable bit
+    @fmxr FPEXC, r0                        @ Set Neon/VFP Enable bit
 
     cpsie  i                              @ Enable interrupts
 
