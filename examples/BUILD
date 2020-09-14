@@ -17,7 +17,7 @@ cc_library(
     srcs = ["source/library.cpp"],
     hdrs = ["includes/library.h"],
     copts = [
-        "-mcpu=cortex-a5",
+        "-mcpu=cortex-a53",
         "-mthumb",
     ],
     includes = ["includes"],
@@ -27,7 +27,7 @@ cc_binary(
     name = "mock_binary",
     srcs = ["source/main.cpp"],
     copts = [
-        "-mcpu=cortex-a5",
+        "-mcpu=cortex-a53",
         "-mthumb",
     ],
     linkopts = [
