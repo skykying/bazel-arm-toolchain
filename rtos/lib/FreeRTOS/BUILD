@@ -33,6 +33,7 @@ cc_library(
     hdrs = glob([
         ":rtos_hdrs",
         ":rtos_port_hdrs",
+        "//rtos:rtos_config",
     ]),
     linkstatic = 1,
     copts = [
@@ -42,5 +43,6 @@ cc_library(
     deps = [
         ":rtos_port_hdrs",
         ":rtos_hdrs",
+        "//rtos:rtos_config",
     ],
 )

@@ -16,6 +16,11 @@ filegroup(
     srcs = glob(["api/*.c",]),
 )
 
+filegroup(
+    name = "rtos_config",
+    srcs = ["apps/FreeRTOSConfig.h",],
+)
+
 cc_library(
     name = "api_hdrs",
     hdrs = glob(["include/api/*.h",]),
