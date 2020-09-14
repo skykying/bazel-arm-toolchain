@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 filegroup(
-    name = "rtos",
+    name = "rtos_group",
     srcs = [
         ":api_library",
         ":arch_arm_library",

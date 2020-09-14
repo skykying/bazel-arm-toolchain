@@ -52,17 +52,12 @@
     licensing and training services.
 */
 
-	.section ".start"
+	.text
 	.arm
 
 	.set SYS_MODE,	0x1f
 	.set SVC_MODE,	0x13
 	.set IRQ_MODE,	0x12
-
-	/* Hardware registers. */
-	.extern ulICCIAR
-	.extern ulICCEOIR
-	.extern ulICCPMR
 
 	/* Variables and functions. */
 	.extern ulMaxAPIPriorityMask
@@ -72,12 +67,12 @@
 	.extern vApplicationIRQHandler
 	.extern ulPortInterruptNesting
 	.extern ulPortTaskHasFPUContext
+	.extern ulICCEOIR
+	.extern ulPortYieldRequired
 
 	.global FreeRTOS_IRQ_Handler
-	.global FreeRTOS_SWI_Handler
+	.global FreeRTOS_SVC_Handler
 	.global vPortRestoreTaskContext
-
-
 
 
 .macro portSAVE_CONTEXT
@@ -100,12 +95,12 @@
 	CMP		R3, #0
 
 	/* Save the floating point context, if any. */
-
 	FMRXNE  R1,  FPSCR
 	VPUSHNE {D0-D15}
+#if configFPU_D32 == 1
 	VPUSHNE	{D16-D31}
-	PUSHNE	{R1} 
-	
+#endif /* configFPU_D32 */
+	PUSHNE	{R1}
 
 	/* Save ulPortTaskHasFPUContext itself. */
 	PUSH	{R3}
@@ -135,7 +130,9 @@
 
 	/* Restore the floating point context, if any. */
 	POPNE 	{R0}
+#if configFPU_D32 == 1
 	VPOPNE	{D16-D31}
+#endif /* configFPU_D32 */
 	VPOPNE	{D0-D15}
 	VMSRNE  FPSCR, R0
 
@@ -143,15 +140,6 @@
 	LDR		R0, ulCriticalNestingConst
 	POP		{R1}
 	STR		R1, [R0]
-
-	/* Ensure the priority mask is correct for the critical nesting depth. */
-	LDR		R2, ulICCPMRConst
-	LDR		R2, [R2]
-	CMP		R1, #0
-	MOVEQ	R4, #255
-	LDRNE	R4, ulMaxAPIPriorityMaskConst
-	LDRNE	R4, [R4]
-	STR		R4, [R2]
 
 	/* Restore all system mode registers other than the SP (which is already
 	being used). */
@@ -166,11 +154,11 @@
 
 
 /******************************************************************************
- * SVC handler is used to start the scheduler.
+ * SVC handler is used to yield.
  *****************************************************************************/
 .align 4
-.type FreeRTOS_SWI_Handler, %function
-FreeRTOS_SWI_Handler:
+.type FreeRTOS_SVC_Handler, %function
+FreeRTOS_SVC_Handler:
 	/* Save the context of the current task and select a new task to run. */
 	portSAVE_CONTEXT
 	LDR R0, vTaskSwitchContextConst
@@ -181,6 +169,7 @@ FreeRTOS_SWI_Handler:
 /******************************************************************************
  * vPortRestoreTaskContext is used to start the scheduler.
  *****************************************************************************/
+.align 4
 .type vPortRestoreTaskContext, %function
 vPortRestoreTaskContext:
 	/* Switch to system mode. */
@@ -199,35 +188,24 @@ FreeRTOS_IRQ_Handler:
 	PUSH	{lr}
 
 	/* Change to supervisor mode to allow reentry. */
-	CPS		#SVC_MODE
+	CPS		#0x13
 
 	/* Push used registers. */
-	PUSH	{r0-r4, r12}
-	mov r6, #100
+	PUSH	{r0-r3, r12}
 
 	/* Increment nesting count.  r3 holds the address of ulPortInterruptNesting
 	for future use.  r1 holds the original ulPortInterruptNesting value for
 	future use. */
 	LDR		r3, ulPortInterruptNestingConst
 	LDR		r1, [r3]
-	ADD		r4, r1, #1
-	STR		r4, [r3]
-
-	mov r6, #101
-
-	/* Read value from the interrupt acknowledge register, which is stored in r0
-	for future parameter and interrupt clearing use. */
-	LDR 	r2, =ulICCIAR
-	LDR		r2, [r2]
-	LDR		r0, [r2]
+	ADD		r0, r1, #1
+	STR		r0, [r3]
 
 	/* Ensure bit 2 of the stack pointer is clear.  r2 holds the bit 2 value for
 	future use. */
-	MOV		r2, sp
-	AND		r2, r2, #4
+	MOV		r0, sp
+	AND		r2, r0, #4
 	SUB		sp, sp, r2
-
-	mov r6, #103
 
 	/* Call the interrupt handler. */
 	PUSH	{r0-r3, lr}
@@ -240,10 +218,10 @@ FreeRTOS_IRQ_Handler:
 	DSB
 	ISB
 
-	/* Write the value read from ICCIAR to ICCEOIR. */
-	LDR 	r4, ulICCEOIRConst
-	LDR		r4, [r4]
-	STR		r0, [r4]
+	/* Write to the EOI register. */
+	LDR 	r0, ulICCEOIRConst
+	LDR		r2, [r0]
+	STR		r0, [r2]
 
 	/* Restore the old nesting count. */
 	STR		r1, [r3]
@@ -255,7 +233,7 @@ FreeRTOS_IRQ_Handler:
 	/* Did the interrupt request a context switch?  r1 holds the address of
 	ulPortYieldRequired and r0 the value of ulPortYieldRequired for future
 	use. */
-	LDR		r1, =ulPortYieldRequired
+	LDR		r1, ulPortYieldRequiredConst
 	LDR		r0, [r1]
 	CMP		r0, #0
 	BNE		switch_before_exit
@@ -263,7 +241,7 @@ FreeRTOS_IRQ_Handler:
 exit_without_switch:
 	/* No context switch.  Restore used registers, LR_irq and SPSR before
 	returning. */
-	POP		{r0-r4, r12}
+	POP		{r0-r3, r12}
 	CPS		#IRQ_MODE
 	POP		{LR}
 	MSR		SPSR_cxsf, LR
@@ -278,7 +256,7 @@ switch_before_exit:
 
 	/* Restore used registers, LR-irq and SPSR before saving the context
 	to the task stack. */
-	POP		{r0-r4, r12}
+	POP		{r0-r3, r12}
 	CPS		#IRQ_MODE
 	POP		{LR}
 	MSR		SPSR_cxsf, LR
@@ -296,57 +274,14 @@ switch_before_exit:
 	next. */
 	portRESTORE_CONTEXT
 
-
-/******************************************************************************
- * If the application provides an implementation of vApplicationIRQHandler(),
- * then it will get called directly without saving the FPU registers on
- * interrupt entry, and this weak implementation of
- * vApplicationIRQHandler() will not get called.
- *
- * If the application provides its own implementation of
- * vApplicationFPUSafeIRQHandler() then this implementation of
- * vApplicationIRQHandler() will be called, save the FPU registers, and then
- * call vApplicationFPUSafeIRQHandler().
- *
- * Therefore, if the application writer wants FPU registers to be saved on
- * interrupt entry their IRQ handler must be called
- * vApplicationFPUSafeIRQHandler(), and if the application writer does not want
- * FPU registers to be saved on interrupt entry their IRQ handler must be
- * called vApplicationIRQHandler().
- *****************************************************************************/
-
-.align 4
-.weak vApplicationIRQHandler
-.type vApplicationIRQHandler, %function
-vApplicationIRQHandler:
-	PUSH	{LR}
-	FMRX	R1,  FPSCR
-	VPUSH	{D0-D15}
-	VPUSH	{D16-D31}
-	PUSH	{R1}
-
-	LDR		r1, vApplicationFPUSafeIRQHandlerConst
-	BLX		r1
-
-	POP		{R0}
-	VPOP	{D16-D31}
-	VPOP	{D0-D15}
-	VMSR	FPSCR, R0
-
-	POP {PC}
-
-
-ulICCIARConst:	.word ulICCIAR
 ulICCEOIRConst:	.word ulICCEOIR
-ulICCPMRConst: .word ulICCPMR
 pxCurrentTCBConst: .word pxCurrentTCB
 ulCriticalNestingConst: .word ulCriticalNesting
 ulPortTaskHasFPUContextConst: .word ulPortTaskHasFPUContext
-ulMaxAPIPriorityMaskConst: .word ulMaxAPIPriorityMask
 vTaskSwitchContextConst: .word vTaskSwitchContext
 vApplicationIRQHandlerConst: .word vApplicationIRQHandler
 ulPortInterruptNestingConst: .word ulPortInterruptNesting
-vApplicationFPUSafeIRQHandlerConst: .word irq_handler
+ulPortYieldRequiredConst: .word ulPortYieldRequired
 
 .end
 

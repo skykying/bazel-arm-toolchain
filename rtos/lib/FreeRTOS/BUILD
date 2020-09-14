@@ -30,11 +30,15 @@ cc_library(
 cc_library(
     name = "rtos_library",
     srcs = [":rtos_srcs",],
-    hdrs = glob([
+    hdrs = [
         ":rtos_hdrs",
         ":rtos_port_hdrs",
         "//rtos:rtos_config",
-    ]),
+        "//rtos:api_hdrs",
+        "//rtos:driver_hdrs",
+        "//rtos:libs_hdrs",
+        "//rtos:arch_hdrs",
+    ],
     linkstatic = 1,
     copts = [
         "-mcpu=cortex-a53",
@@ -44,5 +48,9 @@ cc_library(
         ":rtos_port_hdrs",
         ":rtos_hdrs",
         "//rtos:rtos_config",
+        "//rtos:api_hdrs",
+        "//rtos:driver_hdrs",
+        "//rtos:libs_hdrs",
+        "//rtos:arch_hdrs",
     ],
 )

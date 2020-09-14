@@ -52,7 +52,7 @@
     licensing and training services.
 */
 
-	.section ".start"
+	.text
 	.arm
 
 	.set SYS_MODE,	0x1f
@@ -100,12 +100,10 @@
 	CMP		R3, #0
 
 	/* Save the floating point context, if any. */
-
 	FMRXNE  R1,  FPSCR
 	VPUSHNE {D0-D15}
 	VPUSHNE	{D16-D31}
-	PUSHNE	{R1} 
-	
+	PUSHNE	{R1}
 
 	/* Save ulPortTaskHasFPUContext itself. */
 	PUSH	{R3}
@@ -203,7 +201,6 @@ FreeRTOS_IRQ_Handler:
 
 	/* Push used registers. */
 	PUSH	{r0-r4, r12}
-	mov r6, #100
 
 	/* Increment nesting count.  r3 holds the address of ulPortInterruptNesting
 	for future use.  r1 holds the original ulPortInterruptNesting value for
@@ -213,11 +210,9 @@ FreeRTOS_IRQ_Handler:
 	ADD		r4, r1, #1
 	STR		r4, [r3]
 
-	mov r6, #101
-
 	/* Read value from the interrupt acknowledge register, which is stored in r0
 	for future parameter and interrupt clearing use. */
-	LDR 	r2, =ulICCIAR
+	LDR 	r2, ulICCIARConst
 	LDR		r2, [r2]
 	LDR		r0, [r2]
 
@@ -226,8 +221,6 @@ FreeRTOS_IRQ_Handler:
 	MOV		r2, sp
 	AND		r2, r2, #4
 	SUB		sp, sp, r2
-
-	mov r6, #103
 
 	/* Call the interrupt handler. */
 	PUSH	{r0-r3, lr}
@@ -346,7 +339,7 @@ ulMaxAPIPriorityMaskConst: .word ulMaxAPIPriorityMask
 vTaskSwitchContextConst: .word vTaskSwitchContext
 vApplicationIRQHandlerConst: .word vApplicationIRQHandler
 ulPortInterruptNestingConst: .word ulPortInterruptNesting
-vApplicationFPUSafeIRQHandlerConst: .word irq_handler
+vApplicationFPUSafeIRQHandlerConst: .word vApplicationFPUSafeIRQHandler
 
 .end
 

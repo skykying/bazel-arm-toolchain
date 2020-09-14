@@ -15,7 +15,7 @@ void vTickInterrupt()
   DISABLE_TICK_INTERRUPT();
   if (xTaskIncrementTick() != pdFALSE)
   {
-    ulPortYieldRequired = pdTRUE;    
+    ulPortYieldRequired = pdTRUE;
   }
   ENABLE_TICK_INTERRUPT();
 }
@@ -31,7 +31,7 @@ On this link you can find very good instructions for installing Xen with Linux a
 
 http://odroid.com/dokuwiki/doku.php?id=en:xu4_xen
 
-## Further work
+## Further work //////////////////////////////////<huawei 20109>////////////////////////////////////////
 
 In this project, goal is to implement and test:
 
