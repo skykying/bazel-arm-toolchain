@@ -1,4 +1,4 @@
-# project/BUILD.bazel
+package(default_visibility = ["//visibility:public"])
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
@@ -16,9 +16,10 @@ filegroup(
     srcs = glob(["api/*.c",]),
 )
 
-filegroup(
+cc_library(
     name = "rtos_config",
-    srcs = ["apps/FreeRTOSConfig.h",],
+    hdrs = ["apps/FreeRTOSConfig.h",],
+    strip_include_prefix = "apps",
 )
 
 cc_library(
