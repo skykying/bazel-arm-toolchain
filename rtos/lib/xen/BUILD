@@ -7,6 +7,8 @@ cc_library(
     srcs = glob(["*.c",]),
     hdrs = [
         "//rtos:arch_hdrs",
+        "//rtos:libs_hdrs",
+        "//rtos:api_hdrs",
     ],
     linkstatic = 1,
     copts = [
@@ -15,5 +17,7 @@ cc_library(
     ],
     deps = [
         "//rtos:arch_hdrs",
+        "//rtos:libs_hdrs",
+        "//rtos:api_hdrs",
     ],
 )

@@ -41,7 +41,7 @@ cc_library(
     ],
     linkstatic = 1,
     copts = [
-        "-mcpu=cortex-a53",
+        "-mcpu=cortex-a7",
         "-mthumb",
     ],
     deps = [

@@ -42,7 +42,10 @@ cc_library(
 
 cc_library(
     name = "libs_hdrs",
-    hdrs = glob(["include/lib/*/*.h",]),
+    hdrs = glob([
+        "include/lib/*/*.h",
+        "include/lib/*.h",
+        ]),
     strip_include_prefix = "include/lib",
 )
 
@@ -50,6 +53,7 @@ cc_library(
     name = "arch_hdrs",
     hdrs = glob([
         "include/arch/arm/*.S",
+        "include/arch/arm/*.h",
         "include/arch/xen/*.h",
         "include/arch/xen/hvm/*.h",
         "include/arch/xen/xsm/*.h",

@@ -6,6 +6,7 @@ build --platforms=@arm_none_eabi//platforms:arm_none_generic
 
 # verbose messages from the sandbox
 build --sandbox_debug
+build --verbose_failures
 
 # Use the legacy crosstool-top config
 build:legacy --crosstool_top=@arm_none_eabi//toolchain
