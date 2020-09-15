@@ -46,12 +46,6 @@
 #include <stdarg.h>
 #include "waittypes.h"
 
-#ifndef DEBUG
-#define DEBUG 0
-#endif
-
-#define dprintk if (DEBUG) printk
-
 struct consfront_dev {
     domid_t dom;
 

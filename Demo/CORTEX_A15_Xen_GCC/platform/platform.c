@@ -19,10 +19,9 @@
 
 
 #include <platform/xen_setup.h>
-#include <freertos/mmu.h>
 
 /* Called by boot.s to set up platform-specific services. */
 void platform_setup()
 {
-    xen_setup(device_tree);
+    xen_setup();
 }

@@ -20,12 +20,11 @@ CROSS_COMPILE=arm-none-eabi-
 XEN_PREFIX=/usr
 
 RTOS_SOURCE=../../Source
-FDT_SOURCE=../../dtc
 DEMO_COMMON=../Common/Minimal
 DEMO_INCLUDE=../Common/include
 PORT=$(RTOS_SOURCE)/portable/GCC/ARM7_CA15_Xen
 DEBUG=
-OPTIMIZE=
+OPTIMIZE=-O3
 
 CC=$(CROSS_COMPILE)gcc
 AR=$(CROSS_COMPILE)ar
@@ -40,7 +39,6 @@ CFLAGS= $(DEBUG) $(OPTIMIZE) \
 	-I $(DEMO_INCLUDE) \
 	-I $(PORT)/include \
 	-I $(XEN_PREFIX)/include \
-	-I $(FDT_SOURCE)/libfdt \
 	-D XEN_HAVE_PV_GUEST_ENTRY=1 \
 	-D CA15_XEN_GCC \
 	-mcpu=cortex-a15 \
@@ -82,14 +80,13 @@ CSOURCES= \
 	platform/minlibc/vfprintf.c \
 	platform/minlibc/snprintf.c \
 	platform/minlibc/memcpy.c \
-	platform/minlibc/memchr.c \
-	platform/minlibc/memmove.c \
 	platform/minlibc/memset.c \
 	platform/minlibc/memcmp.c \
 	platform/minlibc/strlen.c \
 	platform/minlibc/strnlen.c \
 	platform/minlibc/strcmp.c \
 	platform/minlibc/strdup.c \
+	platform/minlibc/strcpy.c \
 	platform/minlibc/printf.c \
 	platform/minlibc/puts.c \
 	platform/minlibc/sscanf.c \
@@ -110,7 +107,8 @@ ASOURCES= \
 	  $(PORT)/asm/strings.s \
 	  $(PORT)/asm/ldivmod.s \
 	  $(PORT)/asm/tlb.s \
-	  $(PORT)/asm/cache.s
+	  $(PORT)/asm/cache.s \
+	  $(PORT)/asm/pt.s
 
 OTHER_A= \
        $(PORT)/asm/print.s \
@@ -119,22 +117,11 @@ OTHER_A= \
        $(PORT)/asm/stack.s \
        $(PORT)/asm/bss.s
 
-FDT_OBJS= \
-    $(FDT_SOURCE)/libfdt/fdt.o \
-    $(FDT_SOURCE)/libfdt/fdt_ro.o \
-    $(FDT_SOURCE)/libfdt/fdt_wip.o \
-    $(FDT_SOURCE)/libfdt/fdt_sw.o \
-    $(FDT_SOURCE)/libfdt/fdt_rw.o \
-    $(FDT_SOURCE)/libfdt/fdt_strerror.o \
-    $(FDT_SOURCE)/libfdt/fdt_empty_tree.o \
-    $(FDT_SOURCE)/libfdt/fdt_addresses.o
-
 COBJS = $(CSOURCES:.c=.o)
 AOBJS = $(ASOURCES:.s=.o)
 
 FreeRTOS.a: $(AOBJS) $(COBJS)
-	$(MAKE) -C $(FDT_SOURCE) CC=$(CC) AR=$(AR)
-	$(AR) r FreeRTOS.a $(AOBJS) $(COBJS) $(FDT_OBJS)
+	$(AR) r FreeRTOS.a $(AOBJS) $(COBJS)
 
 $(COBJS): %.o : %.c Makefile include/FreeRTOSConfig.h
 	$(CC) -c $(CFLAGS) $*.c -o $*.o

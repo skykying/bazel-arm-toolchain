@@ -23,6 +23,9 @@
 #include <freertos/mmu.h>
 #include <freertos/asm/mm.h>
 
+#define DEBUG 0
+#define dprintk if (DEBUG) printk
+
 extern uint32_t l1_page_table[L1_ENTRIES];
 extern uint32_t l2_page_table[L2_TOTAL][L2_ENTRIES];
 
@@ -62,14 +65,7 @@ void setup_direct_map(void)
 	    // (1:1); use a 1 MB descriptor
 	    desc = DESC_SECTION(i, flags);
 
-        // If the page table entry is already present, that's because
-        // boot.s put it there to get the code segment's virtual and
-        // physical address mappings set up. Skip this entry if so.
-        if (l1_page_table[i]) {
-            dprintk("Skipping preexisting L1 page table entry %d\n", i);
-        } else {
-            l1_page_table[i] = desc;
-        }
+	    l1_page_table[i] = desc;
     }
 
     dprintk("Done setting up direct map\n");
@@ -107,7 +103,7 @@ static int alloc_l2()
     dprintk("mmu: alloc_l2 using 0x%x as l2 page table base address for cur_l1_idx = 0x%x\n",
 		    addr, mmu_state.cur_l1_idx);
 
-    desc = DESC_PAGE_TABLE((uint32_t)addr + physical_address_offset);
+    desc = DESC_PAGE_TABLE((uint32_t)addr);
 
     dprintk("mmu: l1[0x%x + 0x%x] = 0x%x\n", L2_BASE_INDEX, mmu_state.cur_l1_idx, desc);
 
@@ -142,7 +138,7 @@ void * map_frame(unsigned long pfn)
 
     dprintk("mmu: free_mappings() = 0x%x\n", free_mappings());
 
-    desc = DESC_SMALL_PAGE(pfn, FLAGS_CACHEABLE | FLAGS_BUFFERABLE | SP_FLAGS_READWRITE);
+    desc = DESC_SMALL_PAGE(pfn, FLAGS_CACHEABLE | FLAGS_BUFFERABLE);
 
     dprintk("mmu: l2[0x%x][0x%x] = 0x%x\n",
 		    mmu_state.cur_l1_idx, mmu_state.next_l2_idx, desc);
@@ -176,10 +172,10 @@ void * map_frames_direct(unsigned long count, unsigned long *start_mfn)
     start_frame = ((L2_BASE_INDEX + mmu_state.cur_l1_idx) << 8) | mmu_state.next_l2_idx;
 
     for (i = 0; i < count; i++) {
-        cur_va = map_frame(start_frame + i);
+	cur_va = map_frame(start_frame + i);
 
-        if (i == 0)
-            start_va = cur_va;
+	if (i == 0)
+	    start_va = cur_va;
     }
 
     *start_mfn = start_frame;
@@ -199,13 +195,11 @@ void * map_frames(unsigned long *lst, unsigned long count)
     if (free_mappings() < count)
         return NULL;
 
-    dprintk("map_frames: mapping %d frames\n", count);
-
     for (i = 0; i < count; i++) {
-        cur_va = map_frame(lst[i]);
+	cur_va = map_frame(lst[i]);
 
-        if (i == 0)
-            start_va = cur_va;
+	if (i == 0)
+	    start_va = cur_va;
     }
 
     return start_va;
@@ -216,6 +210,11 @@ void mmu_setup(void)
 	setup_mmu_state();
 	setup_direct_map();
 	invalidate_tlb();
+	install_pt_address();
+	printk("Installed page table address\n");
+	set_domain_permissions();
+	printk("Set domain permissions\n");
 	flush_caches();
+	enable_mmu();
 	printk("MMU setup complete.\n");
 }

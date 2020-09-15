@@ -20,7 +20,6 @@
 #include <FreeRTOS.h>
 #include <semphr.h>
 #include <task.h>
-#include <string.h>
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -30,6 +29,9 @@
 #include <platform/gnttab.h>
 #include <platform/hypervisor.h>
 #include <platform/console.h>
+
+#define DEBUG 0
+#define dprintk if (DEBUG) printk
 
 grant_entry_t *gnttab_table;
 static grant_ref_t gnttab_list[NR_GRANT_ENTRIES];
@@ -157,6 +159,18 @@ gnttab_end_transfer(grant_ref_t ref)
     return frame;
 }
 
+grant_ref_t
+gnttab_alloc_and_grant(void **map)
+{
+    unsigned long mfn;
+    grant_ref_t gref;
+
+    *map = pvPortMalloc(PAGE_SIZE);
+    mfn = virt_to_mfn(*map);
+    gref = gnttab_grant_access(0, mfn, 0);
+    return gref;
+}
+
 const char *
 gnttabop_error(int16_t status)
 {
@@ -244,7 +258,7 @@ init_gnttab(void)
     }
 
     gnttab_table = (grant_entry_t *) map_frames(frames, NR_GRANT_FRAMES);
-    printk("Grant table mapped at 0x%p\n", gnttab_table);
+    printk("Grant table mapped at %p\n", gnttab_table);
 }
 
 void

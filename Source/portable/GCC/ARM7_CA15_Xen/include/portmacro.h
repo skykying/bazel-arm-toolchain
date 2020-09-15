@@ -29,15 +29,15 @@
 #endif
 
 #define portSTACK_GROWTH			( -1 )
-#define portTICK_RATE_MS			( ( portTickType ) 1000 / configTICK_RATE_HZ )
+// #define portTICK_RATE_MS			( ( portTickType ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT			8
 
-#define portINTERRUPT_CONTROLLER_CPU_INTERFACE_ADDRESS 		( gic.gicc_base )
-#define portICCIAR_INTERRUPT_ACKNOWLEDGE_REGISTER_ADDRESS 	( ( gic.gicc_base + GICC_IAR ) )
-#define portICCEOIR_END_OF_INTERRUPT_REGISTER_ADDRESS 		( ( gic.gicc_base + GICC_EOIR ) )
-#define portICCPMR_PRIORITY_MASK_REGISTER_ADDRESS 		( ( gic.gicc_base + GICC_PMR ) )
-#define portICCBPR_BINARY_POINT_REGISTER_ADDRESS		( ( gic.gicc_base + GICC_BPR ) )
-#define portICCRPR_RUNNING_PRIORITY_REGISTER_ADDRESS		( ( gic.gicc_base + GICC_RPR ) )
+#define portINTERRUPT_CONTROLLER_CPU_INTERFACE_ADDRESS 		( GICC_BASE )
+#define portICCIAR_INTERRUPT_ACKNOWLEDGE_REGISTER_ADDRESS 	( ( GICC_BASE + GICC_IAR ) )
+#define portICCEOIR_END_OF_INTERRUPT_REGISTER_ADDRESS 		( ( GICC_BASE + GICC_EOIR ) )
+#define portICCPMR_PRIORITY_MASK_REGISTER_ADDRESS 		( ( GICC_BASE + GICC_PMR ) )
+#define portICCBPR_BINARY_POINT_REGISTER_ADDRESS		( ( GICC_BASE + GICC_BPR ) )
+#define portICCRPR_RUNNING_PRIORITY_REGISTER_ADDRESS		( ( GICC_BASE + GICC_RPR ) )
 
 #define portICCPMR_PRIORITY_MASK_REGISTER_VALUE			( * (uint32_t *) portICCPMR_PRIORITY_MASK_REGISTER_ADDRESS )
 #define portICCBPR_BINARY_POINT_REGISTER_VALUE 			( * (uint32_t *) portICCBPR_BINARY_POINT_REGISTER_ADDRESS )
@@ -111,10 +111,13 @@ uint32_t global_interrupts_disabled(void);
 #define portLONG		long
 #define portSHORT		short
 #define portSTACK_TYPE	unsigned long
-#define portBASE_TYPE	portLONG
-// NB: this was 'unsigned long' and requires further testing.
-typedef uint32_t portTickType;
-#define portMAX_DELAY ( portTickType ) 0xffffffff
+
+typedef portSTACK_TYPE StackType_t;
+typedef long BaseType_t;
+typedef unsigned long UBaseType_t;
+typedef uint32_t TickType_t;
+
+#define portMAX_DELAY ( TickType_t ) 0xffffffff
 
 /*-----------------------------------------------------------*/
 

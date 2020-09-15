@@ -30,6 +30,9 @@
 
 #include <platform/console.h>
 
+#define PORT_DEBUG 0
+#define dprintk if (PORT_DEBUG) printk
+
 /*
  * Starts the first task executing.  This function is necessarily written in
  * assembly code so is implemented in portASM.s.
@@ -160,7 +163,7 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xPortStartScheduler( void )
+BaseType_t xPortStartScheduler( void )
 {
 	unsigned long ulAPSR;
 
