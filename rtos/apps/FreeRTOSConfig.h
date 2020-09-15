@@ -88,6 +88,8 @@
 
 void vSetupTickInterrupt();
 
+#define configUSE_TASK_FPU_SUPPORT				2
+
 #include <xen/arch-arm.h>
 #include <irqchip/gic.h>
 #include <clocksource/gt.h>

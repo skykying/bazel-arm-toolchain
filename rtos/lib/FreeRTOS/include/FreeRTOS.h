@@ -858,7 +858,7 @@ if floating point hardware is otherwise supported by the FreeRTOS port in use.
 This constant is not supported by all FreeRTOS ports that include floating
 point support. */
 #ifndef configUSE_TASK_FPU_SUPPORT
-	#define configUSE_TASK_FPU_SUPPORT 1
+	#define configUSE_TASK_FPU_SUPPORT 2
 #endif
 
 /*
